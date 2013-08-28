@@ -1,29 +1,13 @@
-# Msgpack::Ruby
+# Pure Ruby MessagePack
 
-TODO: Write a gem description
+MessagePack encoding and decoding in pure Ruby. Mostly to see how near the native implementation you can get.
 
-## Installation
+## Copyright
 
-Add this line to your application's Gemfile:
+Copyright 2013 Theo Hultberg/Iconara
 
-    gem 'msgpack-ruby'
+_Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License You may obtain a copy of the License at_
 
-And then execute:
+[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install msgpack-ruby
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+_Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License._
