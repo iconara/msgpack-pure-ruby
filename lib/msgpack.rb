@@ -19,6 +19,8 @@ module MessagePack
       consume_next
     end
 
+    private
+
     DECODINGS = []
     DECODINGS[0xc0] = lambda { |d| nil }
     DECODINGS[0xc2] = lambda { |d| false }
@@ -46,6 +48,8 @@ module MessagePack
 
     FLOAT_FMT = 'g'.freeze
     DOUBLE_FMT = 'G'.freeze
+
+    public
 
     def consume_byte
       b = @bytes.getbyte(@offset)
