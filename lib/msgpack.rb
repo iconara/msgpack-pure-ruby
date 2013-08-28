@@ -19,7 +19,30 @@ module MessagePack
       consume_next
     end
 
-    private
+    DECODINGS = []
+    DECODINGS[0xc0] = lambda { |d| nil }
+    DECODINGS[0xc2] = lambda { |d| false }
+    DECODINGS[0xc3] = lambda { |d| true }
+    DECODINGS[0xc4] = lambda { |d| d.consume_string(d.consume_byte, Encoding::BINARY) }
+    DECODINGS[0xc5] = lambda { |d| d.consume_string(d.consume_int16, Encoding::BINARY) }
+    DECODINGS[0xc6] = lambda { |d| d.consume_string(d.consume_int32, Encoding::BINARY) }
+    DECODINGS[0xca] = lambda { |d| d.consume_float }
+    DECODINGS[0xcb] = lambda { |d| d.consume_double }
+    DECODINGS[0xcc] = lambda { |d| d.consume_byte }
+    DECODINGS[0xcd] = lambda { |d| d.consume_int16 }
+    DECODINGS[0xce] = lambda { |d| d.consume_int32 }
+    DECODINGS[0xcf] = lambda { |d| d.consume_int64 }
+    DECODINGS[0xd0] = lambda { |d| d.consume_byte - 0x100 }
+    DECODINGS[0xd1] = lambda { |d| d.consume_int16 - 0x10000 }
+    DECODINGS[0xd2] = lambda { |d| d.consume_int32 - 0x100000000 }
+    DECODINGS[0xd3] = lambda { |d| d.consume_int64 - 0x10000000000000000 }
+    DECODINGS[0xd9] = lambda { |d| d.consume_string(d.consume_byte) }
+    DECODINGS[0xda] = lambda { |d| d.consume_string(d.consume_int16) }
+    DECODINGS[0xdb] = lambda { |d| d.consume_string(d.consume_int32) }
+    DECODINGS[0xdc] = lambda { |d| d.consume_array(d.consume_int16) }
+    DECODINGS[0xdd] = lambda { |d| d.consume_array(d.consume_int32) }
+    DECODINGS[0xde] = lambda { |d| Hash[*d.consume_array(d.consume_int16 * 2)] }
+    DECODINGS[0xdf] = lambda { |d| Hash[*d.consume_array(d.consume_int32 * 2)] }
 
     FLOAT_FMT = 'g'.freeze
     DOUBLE_FMT = 'G'.freeze
@@ -75,74 +98,20 @@ module MessagePack
 
     def consume_next
       b = consume_byte
-      if b == 0xc0
-        nil
-      elsif b == 0xc3
-        true
-      elsif b == 0xc2
-        false
+      if (method = DECODINGS[b])
+        method.call(self)
       elsif b <= 0b01111111
         b
       elsif b & 0b11100000 == 0b11100000
         b - 0x100
-      elsif b == 0xcc
-        consume_byte
-      elsif b == 0xd0
-        consume_byte - 0x100
-      elsif b == 0xcd
-        consume_int16
-      elsif b == 0xd1
-        consume_int16 - 0x10000
-      elsif b == 0xce
-        consume_int32
-      elsif b == 0xd2
-        consume_int32 - 0x100000000
-      elsif b == 0xcf
-        consume_int64
-      elsif b == 0xd3
-        consume_int64 - 0x10000000000000000
-      elsif b == 0xca
-        consume_float
-      elsif b == 0xcb
-        consume_double
       elsif b & 0b11100000 == 0b10100000
         size = b & 0b00011111
         consume_string(size)
-      elsif b == 0xd9
-        size = consume_byte
-        consume_string(size)
-      elsif b == 0xc4
-        size = consume_byte
-        consume_string(size, Encoding::BINARY)
-      elsif b == 0xda
-        size = consume_int16
-        consume_string(size)
-      elsif b == 0xc5
-        size = consume_int16
-        consume_string(size, Encoding::BINARY)
-      elsif b == 0xdb
-        size = consume_int32
-        consume_string(size)
-      elsif b == 0xc6
-        size = consume_int32
-        consume_string(size, Encoding::BINARY)
       elsif b & 0b11110000 == 0b10010000
         size = b & 0b00001111
         consume_array(size)
-      elsif b == 0xdc
-        size = consume_int16
-        consume_array(size)
-      elsif b == 0xdd
-        size = consume_int32
-        consume_array(size)
       elsif b & 0b11110000 == 0b10000000
         size = b & 0b00001111
-        Hash[*consume_array(size * 2)]
-      elsif b == 0xde
-        size = consume_int16
-        Hash[*consume_array(size * 2)]
-      elsif b == 0xdf
-        size = consume_int32
         Hash[*consume_array(size * 2)]
       end
     end
