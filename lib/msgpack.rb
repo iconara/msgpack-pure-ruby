@@ -62,16 +62,9 @@ module MessagePack
       d
     end
 
-    def consume_string(size)
+    def consume_string(size, encoding=Encoding::UTF_8)
       s = @bytes[@offset, size]
-      s.force_encoding(Encoding::UTF_8)
-      @offset += size
-      s
-    end
-
-    def consume_binary(size)
-      s = @bytes[@offset, size]
-      s.force_encoding(Encoding::BINARY)
+      s.force_encoding(encoding)
       @offset += size
       s
     end
@@ -120,19 +113,19 @@ module MessagePack
         consume_string(size)
       elsif b == 0xc4
         size = consume_byte
-        consume_binary(size)
+        consume_string(size, Encoding::BINARY)
       elsif b == 0xda
         size = consume_int16
         consume_string(size)
       elsif b == 0xc5
         size = consume_int16
-        consume_binary(size)
+        consume_string(size, Encoding::BINARY)
       elsif b == 0xdb
         size = consume_int32
         consume_string(size)
       elsif b == 0xc6
         size = consume_int32
-        consume_binary(size)
+        consume_string(size, Encoding::BINARY)
       elsif b & 0b11110000 == 0b10010000
         size = b & 0b00001111
         consume_array(size)
